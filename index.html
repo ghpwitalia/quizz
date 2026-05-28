@@ -326,68 +326,82 @@ function showStart(){
     document.getElementById("subjectText").innerHTML="Computer, Internet, browser, password, fake news e sicurezza online.";
   }
 }
+
+// RANDOM ENGINE V2 - stabile
+function quizQuestionKey(q){return String((q && (q.question || q.q || q[0])) || "").toLowerCase().trim();}
+function quizUnique(list){var seen={},out=[];for(var i=0;i<list.length;i++){var k=quizQuestionKey(list[i]);if(k&&!seen[k]){seen[k]=true;out.push(list[i]);}}return out;}
+function quizRecentKey(module){return "missione_recent_"+module;}
+function quizGetRecent(module){try{return JSON.parse(localStorage.getItem(quizRecentKey(module))||"[]");}catch(e){return [];}}
+function quizSetRecent(module,items){try{localStorage.setItem(quizRecentKey(module),JSON.stringify(items.slice(0,30)));}catch(e){}}
+function quizSelectFresh(module,pool,n){pool=shuffle(quizUnique(pool));var recent=quizGetRecent(module);var recentMap={};for(var r=0;r<recent.length;r++){recentMap[recent[r]]=true;}var out=[];for(var i=0;i<pool.length&&out.length<n;i++){var k=quizQuestionKey(pool[i]);if(k&&!recentMap[k])out.push(pool[i]);}for(var j=0;j<pool.length&&out.length<n;j++){var k2=quizQuestionKey(pool[j]);if(k2&&out.map(quizQuestionKey).indexOf(k2)===-1)out.push(pool[j]);}return shuffle(out).slice(0,n);}
+function quizFinalize(module,list,target){var out=shuffle(quizUnique(list)).slice(0,target);var lastFirst=localStorage.getItem("missione_last_first_"+module)||"";if(out.length>1&&quizQuestionKey(out[0])===lastFirst){var si=1+Math.floor(Math.random()*(out.length-1));var tmp=out[0];out[0]=out[si];out[si]=tmp;}if(out.length){localStorage.setItem("missione_last_first_"+module,quizQuestionKey(out[0]));}var recent=out.map(quizQuestionKey).concat(quizGetRecent(module));var seen={},compact=[];for(var i=0;i<recent.length;i++){if(recent[i]&&!seen[recent[i]]){seen[recent[i]]=true;compact.push(recent[i]);}}quizSetRecent(module,compact);return out;}
+function quizChoiceArray(item){var correct=item[1],options=shuffle([correct].concat(item[2]));return{kind:"choice",points:1,question:item[0],correct:correct,options:options,explain:item[3]};}
+function quizTFArray(item){return{kind:"truefalse",points:1,question:item[0],correct:item[1],options:["Vero","Falso"],explain:item[2]};}
+function quizOpenArray(item){return{kind:"open",points:2,question:item[0],correct:item[1],explain:item[2]};}
+function quizChoiceObj(item){return{kind:"choice",points:1,question:item.q,correct:item.a,options:shuffle([item.a].concat(item.o)),explain:item.ex};}
+function quizTFObj(item){return{kind:"truefalse",points:1,question:item.q,correct:item.a,options:["Vero","Falso"],explain:item.ex};}
+function quizOpenObj(item){return{kind:"open",points:2,question:item.q,correct:item.a,explain:item.ex};}
+function makeRegioniChoiceByType(d,type){var q,correct,pool=[];if(d.p==="—"&&type===3){type=4;}if(type===0){q="Qual è il capoluogo della regione "+d.r+"?";correct=d.c;pool=REGIONI_DATA.map(function(x){return x.c});}else if(type===1){q="Quale fiume importante si trova in "+d.r+"?";correct=d.f;pool=REGIONI_DATA.map(function(x){return x.f}).filter(function(x){return x&&x!=="—"});}else if(type===2){q="Quale montagna o gruppo montuoso è collegato a "+d.r+"?";correct=d.m;pool=REGIONI_DATA.map(function(x){return x.m}).filter(function(x){return x&&x!=="—"});}else if(type===3){q="Quale pianura o valle importante è collegata a "+d.r+"?";correct=d.p;pool=REGIONI_DATA.map(function(x){return x.p}).filter(function(x){return x&&x!=="—"});}else{q="Quale città appartiene alla regione "+d.r+"?";correct=pick(d.cities);for(var i=0;i<REGIONI_DATA.length;i++)pool=pool.concat(REGIONI_DATA[i].cities);}pool=unique(pool).filter(function(x){return x&&x!==correct&&x!=="—"});return{kind:"choice",points:1,question:q,correct:correct,options:shuffle([correct].concat(shuffle(pool).slice(0,3))),explain:makeRegioniExplanation(d,type,correct)};}
+// FINE RANDOM ENGINE V2
+
 function makeRegioniExplanation(d,type,correct){if(type===0)return getGeoFact(d.c,d.c+" è il capoluogo della regione "+d.r+".");if(type===1)return getGeoFact(correct,correct+" è un fiume importante collegato alla regione "+d.r+".");if(type===2)return getGeoFact(correct,correct+" è una montagna o un gruppo montuoso importante per "+d.r+".");if(type===3)return getGeoFact(correct,correct+" è una pianura o valle importante collegata a "+d.r+".");return getGeoFact(correct,correct+" è una città importante della regione "+d.r+".")}
 function makeRegioniChoice(d){var type=randomInt(5),q,correct,pool=[];if(type===0){q="Qual è il capoluogo della regione "+d.r+"?";correct=d.c;pool=REGIONI_DATA.map(function(x){return x.c})}else if(type===1){q="Quale fiume importante si trova in "+d.r+"?";correct=d.f;pool=REGIONI_DATA.map(function(x){return x.f}).filter(function(x){return x && x!=="—"})}else if(type===2){q="Quale montagna o gruppo montuoso è collegato a "+d.r+"?";correct=d.m;pool=REGIONI_DATA.map(function(x){return x.m})}else if(type===3){q="Quale pianura o valle importante è collegata a "+d.r+"?";correct=d.p;pool=REGIONI_DATA.map(function(x){return x.p}).filter(function(x){return x && x!=="—"})}else{q="Quale città appartiene alla regione "+d.r+"?";correct=pick(d.cities);for(var i=0;i<REGIONI_DATA.length;i++)pool=pool.concat(REGIONI_DATA[i].cities)}pool=unique(pool).filter(function(x){return x&&x!==correct&&x!=="—"});return{kind:"choice",points:1,question:q,correct:correct,options:shuffle([correct].concat(shuffle(pool).slice(0,3))),explain:makeRegioniExplanation(d,type,correct)}}
 function makeRegioniOpen(d){var type=randomInt(4),q,correct;if(type===0||d.p==="—"){q="Scrivi il capoluogo della regione "+d.r+".";correct=d.c}else if(type===1){q="Scrivi un fiume importante della regione "+d.r+".";correct=d.f}else if(type===2){q="Scrivi una montagna o un gruppo montuoso della regione "+d.r+".";correct=d.m}else{q="Scrivi una città importante della regione "+d.r+".";correct=d.cities}return{kind:"open",points:2,question:q,correct:correct,explain:makeRegioniExplanation(d,type,answerText(correct).split(", ")[0])}}function makeRegioniQuestions(){
-  var qs=[], attempts=0, used={};
-  while(qs.length<8 && attempts<200){
-    attempts++;
-    var d=pick(REGIONI_DATA);
-    var q=makeRegioniChoice(d);
-    var key=q.question.toLowerCase().trim();
-    if(!used[key]){used[key]=true;qs.push(q);}
+  var regs=shuffle(REGIONI_DATA), cap=[], fiumi=[], mont=[], pian=[], citta=[], aperte=[];
+  for(var i=0;i<regs.length;i++){
+    cap.push(makeRegioniChoiceByType(regs[i],0));
+    fiumi.push(makeRegioniChoiceByType(regs[i],1));
+    mont.push(makeRegioniChoiceByType(regs[i],2));
+    if(regs[i].p&&regs[i].p!=="—")pian.push(makeRegioniChoiceByType(regs[i],3));
+    citta.push(makeRegioniChoiceByType(regs[i],4));
+    aperte.push(makeRegioniOpen(regs[i]));
   }
-  attempts=0;
-  while(qs.length<10 && attempts<200){
-    attempts++;
-    var d=pick(REGIONI_DATA);
-    var q=makeRegioniOpen(d);
-    var key=q.question.toLowerCase().trim();
-    if(!used[key]){used[key]=true;qs.push(q);}
-  }
-  return shuffle(qs);
+  var module="regioni";
+  var qs=[];
+  qs=qs.concat(quizSelectFresh(module,cap,2));
+  qs=qs.concat(quizSelectFresh(module,fiumi,2));
+  qs=qs.concat(quizSelectFresh(module,mont,2));
+  qs=qs.concat(quizSelectFresh(module,pian,1));
+  qs=qs.concat(quizSelectFresh(module,citta,1));
+  qs=qs.concat(quizSelectFresh(module,aperte,2));
+  return quizFinalize(module,qs,10);
 }
 function makeTecnologiaQuestions(){
+  var module="tecnologia";
+  var choices=TECNOLOGIA_CHOICE.map(quizChoiceObj);
+  var tf=TECNOLOGIA_TF.map(quizTFObj);
+  var open=TECNOLOGIA_OPEN.map(quizOpenObj);
   var qs=[];
-  qs = qs.concat(sampleUnique(TECNOLOGIA_CHOICE,6).map(function(item){
-    return {kind:"choice",points:1,question:item.q,correct:item.a,options:shuffle([item.a].concat(item.o)),explain:item.ex};
-  }));
-  qs = qs.concat(sampleUnique(TECNOLOGIA_TF,2).map(function(item){
-    return {kind:"truefalse",points:1,question:item.q,correct:item.a,options:["Vero","Falso"],explain:item.ex};
-  }));
-  qs = qs.concat(sampleUnique(TECNOLOGIA_OPEN,2).map(function(item){
-    return {kind:"open",points:2,question:item.q,correct:item.a,explain:item.ex};
-  }));
-  return shuffle(qs);
+  qs=qs.concat(quizSelectFresh(module,choices,6));
+  qs=qs.concat(quizSelectFresh(module,tf,2));
+  qs=qs.concat(quizSelectFresh(module,open,2));
+  return quizFinalize(module,qs,10);
 }
 
 function makeStoriaChoice(){var item=pick(STORIA_CHOICE),correct=item[1],options=shuffle([correct].concat(item[2]));return{kind:"choice",points:1,question:item[0],correct:correct,options:options,explain:item[3]}}function makeStoriaTF(){var item=pick(STORIA_TF);return{kind:"truefalse",points:1,question:item[0],correct:item[1],options:["Vero","Falso"],explain:item[2]}}function makeStoriaOpen(){var item=pick(STORIA_OPEN);return{kind:"open",points:2,question:item[0],correct:item[1],explain:item[2]}}function makeStoriaQuestions(){
+  var module="storia";
+  var choices=STORIA_CHOICE.map(quizChoiceArray);
+  var tf=STORIA_TF.map(quizTFArray);
+  var open=STORIA_OPEN.map(quizOpenArray);
   var qs=[];
-  qs = qs.concat(sampleUnique(STORIA_CHOICE,6).map(function(item){
-    var correct=item[1], options=shuffle([correct].concat(item[2]));
-    return {kind:"choice",points:1,question:item[0],correct:correct,options:options,explain:item[3]};
-  }));
-  qs = qs.concat(sampleUnique(STORIA_TF,2).map(function(item){
-    return {kind:"truefalse",points:1,question:item[0],correct:item[1],options:["Vero","Falso"],explain:item[2]};
-  }));
-  qs = qs.concat(sampleUnique(STORIA_OPEN,2).map(function(item){
-    return {kind:"open",points:2,question:item[0],correct:item[1],explain:item[2]};
-  }));
-  return shuffle(qs);
+  qs=qs.concat(quizSelectFresh(module,choices,6));
+  qs=qs.concat(quizSelectFresh(module,tf,2));
+  qs=qs.concat(quizSelectFresh(module,open,2));
+  return quizFinalize(module,qs,10);
 }function makeScienzeChoice(){var item=pick(SCIENZE_CHOICE);return{kind:"choice",points:1,question:item.q,correct:item.a,options:shuffle([item.a].concat(item.o)),explain:item.ex}}function makeScienzeTF(){var item=pick(SCIENZE_TF);return{kind:"truefalse",points:1,question:item.q,correct:item.a,options:["Vero","Falso"],explain:item.ex}}function makeScienzeOpen(){var item=pick(SCIENZE_OPEN);return{kind:"open",points:2,question:item.q,correct:item.a,explain:item.ex}}function makeScienzeQuestions(){
-  var corpo = sampleUnique(SCIENZE_CHOICE.filter(x=>x.topic==="corpo"),5).map(function(item){
-    return {kind:"choice",points:1,question:item.q,correct:item.a,options:shuffle([item.a].concat(item.o)),explain:item.ex};
-  });
-
-  var universo = sampleUnique(SCIENZE_CHOICE.filter(x=>x.topic==="universo"),5).map(function(item){
-    return {kind:"choice",points:1,question:item.q,correct:item.a,options:shuffle([item.a].concat(item.o)),explain:item.ex};
-  });
-
-  var energia = sampleUnique(SCIENZE_CHOICE.filter(x=>x.topic==="energia"),5).map(function(item){
-    return {kind:"choice",points:1,question:item.q,correct:item.a,options:shuffle([item.a].concat(item.o)),explain:item.ex};
-  });
-
-  return shuffle(corpo.concat(universo).concat(energia));
+  var module="scienze";
+  var corpo=SCIENZE_CHOICE.filter(function(x){return x.topic==="corpo";}).map(quizChoiceObj);
+  var universo=SCIENZE_CHOICE.filter(function(x){return x.topic==="universo";}).map(quizChoiceObj);
+  var energia=SCIENZE_CHOICE.filter(function(x){return x.topic==="energia";}).map(quizChoiceObj);
+  var tf=SCIENZE_TF.map(quizTFObj);
+  var open=SCIENZE_OPEN.map(quizOpenObj);
+  var qs=[];
+  qs=qs.concat(quizSelectFresh(module,corpo,2));
+  qs=qs.concat(quizSelectFresh(module,universo,2));
+  qs=qs.concat(quizSelectFresh(module,energia,2));
+  qs=qs.concat(quizSelectFresh(module,tf,2));
+  qs=qs.concat(quizSelectFresh(module,open,2));
+  return quizFinalize(module,qs,10);
 }
 function startQuiz(mode){currentMode=mode;wrongQuestions=[];reviewMode=false;questions=selectedSubject==="regioni"?makeRegioniQuestions():(selectedSubject==="storia"?makeStoriaQuestions():(selectedSubject==="scienze"?makeScienzeQuestions():makeTecnologiaQuestions()));idx=0;score=0;hideAll();document.getElementById("quizPanel").style.display="block";showQuestion()}function startReview(){if(!wrongQuestions.length)return;reviewMode=true;questions=wrongQuestions.slice();idx=0;score=0;hideAll();document.getElementById("quizPanel").style.display="block";showQuestion()}
 function showQuestion(){answered=false;var q=questions[idx];document.getElementById("counter").innerHTML=(idx+1)+"/"+questions.length;document.getElementById("score").innerHTML=reviewMode?"Ripasso":score+" punti";document.getElementById("fill").style.width=(idx/questions.length*100)+"%";document.getElementById("question").innerHTML=q.question;document.getElementById("feedback").className="feedback";document.getElementById("feedback").innerHTML="";document.getElementById("nextBtn").style.display="none";document.getElementById("checkBtn").style.display=q.kind==="open"?"block":"none";var badge=document.getElementById("badge");if(reviewMode){badge.className="badge review";badge.innerHTML="📚 Ripasso degli errori"}else if(q.kind==="open"){badge.className="badge open";badge.innerHTML="✍️ Domanda aperta · 2 punti"}else if(q.kind==="truefalse"){badge.className="badge truefalse";badge.innerHTML="🔎 Vero o falso · 1 punto"}else{badge.className="badge";badge.innerHTML="✅ Scelta multipla · 1 punto"}var area=document.getElementById("answerArea");area.innerHTML="";if(q.kind==="choice"||q.kind==="truefalse"){var box=document.createElement("div");box.className="answers";var opts=sanitizeOptions(q.options,q.correct);for(var i=0;i<opts.length;i++){var b=document.createElement("button");b.className="answer";b.innerHTML=opts[i];b.onclick=(function(opt,btn){return function(){answerChoice(btn,opt)}})(opts[i],b);box.appendChild(b)}area.appendChild(box)}else{var input=document.createElement("input");input.id="openInput";input.placeholder="Scrivi la risposta...";input.autocomplete="off";input.onkeydown=function(e){if(e.key==="Enter")checkOpen()};area.appendChild(input)}}
