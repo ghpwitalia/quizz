@@ -24,9 +24,7 @@
   color:#64746f;
   text-decoration:none;
 }
-.feedback-links a:hover{
-  text-decoration:underline;
-}
+.feedback-links a:hover{text-decoration:underline}
 #welcomeOverlay{
   position:fixed; inset:0; background:rgba(0,0,0,.55);
   display:flex; align-items:center; justify-content:center; z-index:9999;
@@ -56,7 +54,7 @@
 <body>
 <div class="app">
 <div class="top"><div class="brand"><div class="icon" id="appIcon">🎓</div><div><h1 id="appTitle">Missione Media</h1><div class="small" id="today">Quiz del giorno</div></div></div><div class="streak" id="streakBox">🔥 0 giorni</div></div>
-<div class="card" id="homePanel"><div class="center"><div style="font-size:52px">🎓</div><div class="result-title">Scegli una sezione</div><p class="small">Un modo leggero e divertente per ripassare durante le vacanze e arrivare più sicuri alla scuola media.</p><p class="small">Ogni quiz ha 10 domande. Alla fine puoi ripassare gli errori.</p></div><div class="home-grid"><div class="subject-card" onclick="selectSubject('regioni')"><div class="subject-icon">🌍</div><div class="subject-title">Regioni d’Italia</div><div class="subject-desc">Capoluoghi, fiumi, montagne, pianure e città principali.</div></div><div class="subject-card" onclick="selectSubject('storia')"><div class="subject-icon">🏛️</div><div class="subject-title">Storia</div><div class="subject-desc">Linea del tempo, Greci, Etruschi, Roma monarchica, repubblicana e imperiale.</div></div><div class="subject-card" onclick="selectSubject('scienze')"><div class="subject-icon">🔬</div><div class="subject-title">Scienze</div><div class="subject-desc">Corpo umano, Universo, Sistema Solare, energia, forze, luce ed elettricità.</div></div><div class="subject-card" onclick="selectSubject('tecnologia')"><div class="subject-icon">💻</div><div class="subject-title">Tecnologia e Sicurezza Digitale</div><div class="subject-desc">Computer, Internet, browser, password, fake news e sicurezza online.</div></div></div></div>
+<div class="card" id="homePanel"><div class="center"><div style="font-size:52px">🎓</div><div class="result-title">Scegli una sezione</div><p class="small">Un modo leggero e divertente per ripassare durante le vacanze e arrivare più sicuri alla scuola media.</p><p class="small">Un modo leggero e divertente per ripassare durante le vacanze e arrivare più sicuri alla scuola media. Ogni quiz ha domande con spiegazioni e ripasso degli errori.</p></div><div class="home-grid"><div class="subject-card" onclick="selectSubject('regioni')"><div class="subject-icon">🌍</div><div class="subject-title">Regioni d’Italia</div><div class="subject-desc">Capoluoghi, fiumi, montagne, pianure e città principali.</div></div><div class="subject-card" onclick="selectSubject('storia')"><div class="subject-icon">🏛️</div><div class="subject-title">Storia</div><div class="subject-desc">Linea del tempo, Greci, Etruschi, Roma monarchica, repubblicana e imperiale.</div></div><div class="subject-card" onclick="selectSubject('scienze')"><div class="subject-icon">🔬</div><div class="subject-title">Scienze</div><div class="subject-desc">Corpo umano, Universo, Sistema Solare, energia, forze, luce ed elettricità.</div></div><div class="subject-card" onclick="selectSubject('tecnologia')"><div class="subject-icon">💻</div><div class="subject-title">Tecnologia e Sicurezza Digitale</div><div class="subject-desc">Computer, Internet, browser, password, fake news e sicurezza online.</div></div></div></div>
 
 <div class="feedback-links">
   <a href="https://forms.gle/XNbMFQ8wChoReWx68" target="_blank">💡 Invia suggerimenti</a>
@@ -259,7 +257,7 @@ var TECNOLOGIA_TF = [
 var TECNOLOGIA_OPEN = [
  {q:"Scrivi il nome di un browser.",a:["Safari","Chrome","Edge","Firefox"],ex:"Un browser serve per navigare sul web."},
  {q:"Che cosa bisogna proteggere per accedere a un account?",a:"Password",ex:"La password protegge gli account online."},
- {q:"Scrivi un comportamento sicuro online.",a:["Non condividere password","Non condividere dati personali","controllare la fonte"],ex:"La sicurezza online è molto importante."},
+ {q:"Come si chiama una notizia falsa online?",a:["Fake news","notizia falsa"],ex:"Le fake news possono diffondere informazioni sbagliate online. Per questo bisogna controllare la fonte."},
  {q:"Come si chiama una notizia falsa online?",a:["Fake news","notizia falsa"],ex:"Le fake news possono diffondere informazioni sbagliate."}
 ];
 var selectedSubject="regioni",questions=[],idx=0,score=0,currentMode="daily",streak=0,wrongQuestions=[],reviewMode=false,answered=false;
@@ -379,7 +377,7 @@ function makeStoriaChoice(){var item=pick(STORIA_CHOICE),correct=item[1],options
 }
 function startQuiz(mode){currentMode=mode;wrongQuestions=[];reviewMode=false;questions=selectedSubject==="regioni"?makeRegioniQuestions():(selectedSubject==="storia"?makeStoriaQuestions():(selectedSubject==="scienze"?makeScienzeQuestions():makeTecnologiaQuestions()));idx=0;score=0;hideAll();document.getElementById("quizPanel").style.display="block";showQuestion()}function startReview(){if(!wrongQuestions.length)return;reviewMode=true;questions=wrongQuestions.slice();idx=0;score=0;hideAll();document.getElementById("quizPanel").style.display="block";showQuestion()}
 function showQuestion(){answered=false;var q=questions[idx];document.getElementById("counter").innerHTML=(idx+1)+"/"+questions.length;document.getElementById("score").innerHTML=reviewMode?"Ripasso":score+" punti";document.getElementById("fill").style.width=(idx/questions.length*100)+"%";document.getElementById("question").innerHTML=q.question;document.getElementById("feedback").className="feedback";document.getElementById("feedback").innerHTML="";document.getElementById("nextBtn").style.display="none";document.getElementById("checkBtn").style.display=q.kind==="open"?"block":"none";var badge=document.getElementById("badge");if(reviewMode){badge.className="badge review";badge.innerHTML="📚 Ripasso degli errori"}else if(q.kind==="open"){badge.className="badge open";badge.innerHTML="✍️ Domanda aperta · 2 punti"}else if(q.kind==="truefalse"){badge.className="badge truefalse";badge.innerHTML="🔎 Vero o falso · 1 punto"}else{badge.className="badge";badge.innerHTML="✅ Scelta multipla · 1 punto"}var area=document.getElementById("answerArea");area.innerHTML="";if(q.kind==="choice"||q.kind==="truefalse"){var box=document.createElement("div");box.className="answers";for(var i=0;i<q.options.length;i++){var b=document.createElement("button");b.className="answer";b.innerHTML=q.options[i];b.onclick=(function(opt,btn){return function(){answerChoice(btn,opt)}})(q.options[i],b);box.appendChild(b)}area.appendChild(box)}else{var input=document.createElement("input");input.id="openInput";input.placeholder="Scrivi la risposta...";input.autocomplete="off";input.onkeydown=function(e){if(e.key==="Enter")checkOpen()};area.appendChild(input)}}
-function showFeedback(ok,q,extra){var fb=document.getElementById("feedback");if(ok){fb.className="feedback ok";fb.innerHTML="Corretto! "+extra+"<span class='explain'>💡 "+escapeHtml(q.explain||"Ottimo lavoro!")+"</span>"}else{fb.className="feedback no";fb.innerHTML="Quasi! La risposta corretta è: "+escapeHtml(answerText(q.correct))+"<span class='explain'>💡 "+escapeHtml(q.explain||"Ripassa questo punto e prova ancora.")+"</span>"}}function markWrong(q){if(!reviewMode)wrongQuestions.push(q)}
+function showFeedback(ok,q,extra){var fb=document.getElementById("feedback");if(ok){fb.className="feedback ok";fb.innerHTML="Corretto! "+extra+"<span class='explain'>💡 "+escapeHtml(q.explain||"Ottimo lavoro!")+"</span>"}else{fb.className="feedback no";fb.innerHTML="Non è corretto. La risposta corretta è: "+escapeHtml(answerText(q.correct))+"<span class='explain'>💡 "+escapeHtml(q.explain||"Ripassa questo punto e prova ancora.")+"</span>"}}function markWrong(q){if(!reviewMode)wrongQuestions.push(q)}
 function answerChoice(btn,opt){if(answered)return;answered=true;var q=questions[idx],buttons=document.getElementsByClassName("answer");for(var i=0;i<buttons.length;i++){buttons[i].disabled=true;if(buttons[i].innerHTML===q.correct)buttons[i].className+=" correct";else if(buttons[i]===btn)buttons[i].className+=" wrong"}if(opt===q.correct){if(!reviewMode)score+=q.points;showFeedback(true,q,reviewMode?"":"+"+q.points+" punto")}else{markWrong(q);showFeedback(false,q,"")}document.getElementById("score").innerHTML=reviewMode?"Ripasso":score+" punti";document.getElementById("nextBtn").style.display="block"}
 function checkOpen(){if(answered)return;var input=document.getElementById("openInput"),q=questions[idx];answered=true;document.getElementById("checkBtn").style.display="none";document.getElementById("nextBtn").style.display="block";input.disabled=true;if(isCorrectOpen(input.value,q.correct)){if(!reviewMode)score+=q.points;showFeedback(true,q,reviewMode?"":"+"+q.points+" punti")}else{markWrong(q);showFeedback(false,q,"")}document.getElementById("score").innerHTML=reviewMode?"Ripasso":score+" punti"}function nextQuestion(){idx++;if(idx>=questions.length){if(reviewMode)finishReview();else finishQuiz()}else showQuestion()}function finishReview(){hideAll();document.getElementById("reviewDonePanel").style.display="block"}
 function finishQuiz(){hideAll();document.getElementById("resultPanel").style.display="block";var title="",text="",trophy="🏆",stars="⭐";if(score>=11){title="Bravissima! "+score+"/12";text="Risultato eccellente. Hai ottenuto 3 stelle.";trophy="🏆";stars="⭐⭐⭐"}else if(score>=8){title="Molto bene! "+score+"/12";text="Ottimo risultato. Hai ottenuto 2 stelle.";trophy="⭐";stars="⭐⭐"}else{title="Buon allenamento! "+score+"/12";text="Ripassa un po’ e prova di nuovo. Hai ottenuto 1 stella.";trophy="💪";stars="⭐"}if(wrongQuestions.length>0){text+=" Puoi ripassare "+wrongQuestions.length+(wrongQuestions.length===1?" errore.":" errori.");document.getElementById("reviewBtn").style.display="block"}else{document.getElementById("reviewBtn").style.display="none";text+=" Nessun errore da ripassare!"}document.getElementById("trophy").innerHTML=trophy;document.getElementById("finalTitle").innerHTML=title;document.getElementById("finalText").innerHTML=text;document.getElementById("stars").innerHTML=stars;updateStreakLabels()}
@@ -390,8 +388,8 @@ try{document.getElementById("today").innerHTML="Quiz del giorno: "+new Date().to
   <div id="welcomeCard">
     <h2>Benvenuta 👋</h2>
     <p>
-      Questo piccolo progetto è stato creato per aiutare bambini e famiglie
-      a ripassare in modo leggero e divertente prima della scuola media.
+      Imparare con curiosità, leggerezza e autonomia.<br><br>
+      Questo piccolo progetto aiuta bambini e famiglie a ripassare prima della scuola media.
     </p>
     <input id="welcomeName" placeholder="Nome o soprannome" maxlength="20"/>
     <button id="welcomeBtn" onclick="savePlayerName()">Inizia la missione</button>
@@ -402,13 +400,12 @@ try{document.getElementById("today").innerHTML="Quiz del giorno: "+new Date().to
     </div>
   </div>
 </div>
-
 <script>
 function initWelcome(){
   var saved = localStorage.getItem("missione_nome");
   if(!saved){
     document.getElementById("welcomeOverlay").style.display="flex";
-  }else{
+  } else {
     personalize(saved);
   }
 }
